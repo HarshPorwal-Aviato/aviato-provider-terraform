@@ -1,34 +1,41 @@
 variable "project_id" {
   type        = string
-  description = "The ID of the project"
+  description = "The ID of the project in which to operate."
   default     = "aviato-game-fight-rvxirf"
 }
 
-variable "default_ssh_source_range" {
-  type        = list(string)
-  description = "Source IP ranges for SSH access"
-  default     = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
-}
-
-variable "default_rdp_source_range" {
-  type        = list(string)
-  description = "Source IP ranges for RDP access"
-  default     = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
-}
-
-variable "gcs_buckets_uniform_acl" {
+variable "default_ssh_source_ranges" {
   type = list(string)
-  description = "list of gcs buckets to apply uniform acl"
+  default = [
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16"
+  ]
+  description = "Source ranges for SSH traffic"
+}
+
+variable "default_rdp_source_ranges" {
+  type = list(string)
+  default = [
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16"
+  ]
+  description = "Source ranges for RDP traffic"
+}
+
+variable "gcs_buckets_uniform_access" {
+  type = list(string)
   default = [
     "aviato-game-fight-rvxirf.appspot.com",
     "aviato-game-fight-rvxirf_bucket",
     "staging.aviato-game-fight-rvxirf.appspot.com"
   ]
+  description = "List of GCS bucket names to enable uniform bucket level access"
 }
 
-variable "regions_with_default_subnet" {
+variable "all_regions" {
   type = list(string)
-  description = "Regions where default subnets exist"
   default = [
     "asia-east1",
     "asia-east2",
@@ -69,12 +76,8 @@ variable "regions_with_default_subnet" {
     "us-west1",
     "us-west2",
     "us-west3",
-    "us-west4"
+    "us-west4",
+    "africa-south1"
   ]
-}
-
-variable "gcs_logging_bucket" {
-  type        = string
-  description = "GCS bucket to store logs"
-  default     = "aviato-game-fight-rvxirf-logs"
+  description = "All GCP regions"
 }
