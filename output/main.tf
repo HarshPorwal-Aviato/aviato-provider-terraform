@@ -2,566 +2,615 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "5.24.0"
+      version = "4.68.0"
     }
   }
 }
 
 provider "google" {
   project = "aviato-game-fight-rvxirf"
+  region  = "us-central1"
 }
 
-resource "google_project_metadata" "oslogin" {
+resource "google_project_service" "containeranalysis" {
+  service            = "containeranalysis.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_storage_bucket" "default_bucket_uniform_access" {
+  name          = "aviato-game-fight-rvxirf.appspot.com"
+  location      = "AUSTRALIA-SOUTHEAST1"
+  force_destroy = false
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket" "bucket_uniform_access" {
+  name          = "aviato-game-fight-rvxirf_bucket"
+  location      = "US"
+  force_destroy = false
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket" "staging_bucket_uniform_access" {
+  name          = "staging.aviato-game-fight-rvxirf.appspot.com"
+  location      = "AUSTRALIA-SOUTHEAST1"
+  force_destroy = false
+  uniform_bucket_level_access = true
+}
+
+resource "google_compute_firewall" "ssh" {
+  name    = "default-allow-ssh"
+  network = "default"
+  project = "aviato-game-fight-rvxirf"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["130.211.0.0/22", "35.235.240.0/20"]
+
+}
+
+resource "google_compute_firewall" "rdp" {
+  name    = "default-allow-rdp"
+  network = "default"
+  project = "aviato-game-fight-rvxirf"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["3389"]
+  }
+
+  source_ranges = ["130.211.0.0/22", "35.235.240.0/20"]
+}
+
+resource "google_compute_network" "default_network" {
+  name                    = "default"
+  project                 = "aviato-game-fight-rvxirf"
+  auto_create_subnetworks = "false"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_compute_network_dns_policy" "default_network_dns_logging" {
+  project = "aviato-game-fight-rvxirf"
+  network = "default"
+  enable_logging = true
+}
+
+resource "google_project_metadata" "project" {
+  project = "aviato-game-fight-rvxirf"
+
   metadata = {
     enable-oslogin = "TRUE"
   }
 }
 
-resource "google_artifact_registry_repository" "container_analysis" {
-  provider = google
-  location = "global"
-  repository_id = "container-analysis"
-  format = "DOCKER"
-}
-
-resource "google_storage_bucket" "default_uniform_bucket_level_access_1" {
-  name                        = "aviato-game-fight-rvxirf.appspot.com"
-  location                    = "AUSTRALIA-SOUTHEAST1"
-  uniform_bucket_level_access = true
-}
-
-resource "google_storage_bucket" "default_uniform_bucket_level_access_2" {
-  name                        = "aviato-game-fight-rvxirf_bucket"
-  location                    = "US"
-  uniform_bucket_level_access = true
-}
-
-resource "google_storage_bucket" "default_uniform_bucket_level_access_3" {
-  name                        = "staging.aviato-game-fight-rvxirf.appspot.com"
-  location                    = "AUSTRALIA-SOUTHEAST1"
-  uniform_bucket_level_access = true
-}
-
-resource "google_compute_network" "default" {
-  name                    = "default"
-  delete_default_routes = true
-}
-
-resource "google_compute_subnetwork" "default_asia_northeast2" {
+resource "google_compute_subnet" "default_asia_northeast2" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.132.0.0/20"
   region        = "asia-northeast2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
   log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_west12" {
+resource "google_compute_subnet" "default_europe_west12" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.168.0.0/20"
   region        = "europe-west12"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_asia_south2" {
+resource "google_compute_subnet" "default_asia_south2" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.166.0.0/20"
   region        = "asia-south2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_west4" {
+resource "google_compute_subnet" "default_europe_west4" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.156.0.0/20"
   region        = "europe-west4"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_us_south1" {
+resource "google_compute_subnet" "default_us_south1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.154.0.0/20"
   region        = "us-south1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_australia_southeast2" {
+resource "google_compute_subnet" "default_australia_southeast2" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.130.0.0/20"
   region        = "australia-southeast2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_me_central1" {
+resource "google_compute_subnet" "default_me_central1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.134.0.0/20"
   region        = "me-central1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_us_east1" {
+resource "google_compute_subnet" "default_us_east1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.128.0.0/20"
   region        = "us-east1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_us_west1" {
+resource "google_compute_subnet" "default_us_west1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.152.0.0/20"
   region        = "us-west1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_west2" {
+resource "google_compute_subnet" "default_europe_west2" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.142.0.0/20"
   region        = "europe-west2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_us_west4" {
+resource "google_compute_subnet" "default_us_west4" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.164.0.0/20"
   region        = "us-west4"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_us_west2" {
+resource "google_compute_subnet" "default_europe_west8" {
   name          = "default"
-  network       = "default"
-  region        = "us-west2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
-    aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-}
-
-resource "google_compute_subnetwork" "default_europe_west8" {
-  name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.148.0.0/20"
   region        = "europe-west8"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_southamerica_west1" {
+resource "google_compute_subnet" "default_southamerica_west1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.170.0.0/20"
   region        = "southamerica-west1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_west9" {
+resource "google_compute_subnet" "default_europe_west9" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.172.0.0/20"
   region        = "europe-west9"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_northamerica_northeast1" {
+resource "google_compute_subnet" "default_northamerica_northeast1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.150.0.0/20"
   region        = "northamerica-northeast1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_asia_east1" {
+resource "google_compute_subnet" "default_asia_east1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.140.0.0/20"
   region        = "asia-east1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_asia_northeast1" {
+resource "google_compute_subnet" "default_asia_northeast3" {
   name          = "default"
-  network       = "default"
-  region        = "asia-northeast1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
-    aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-}
-
-resource "google_compute_subnetwork" "default_us_east5" {
-  name          = "default"
-  network       = "default"
-  region        = "us-east5"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
-    aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-}
-
-resource "google_compute_subnetwork" "default_asia_east2" {
-  name          = "default"
-  network       = "default"
-  region        = "asia-east2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
-    aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-}
-
-resource "google_compute_subnetwork" "default_northamerica_northeast2" {
-  name          = "default"
-  network       = "default"
-  region        = "northamerica-northeast2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
-    aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-}
-
-resource "google_compute_subnetwork" "default_asia_northeast3" {
-  name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.160.0.0/20"
   region        = "asia-northeast3"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_west10" {
+resource "google_compute_subnet" "default_europe_west10" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.174.0.0/20"
   region        = "europe-west10"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_north2" {
+resource "google_compute_subnet" "default_europe_north2" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.176.0.0/20"
   region        = "europe-north2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_asia_southeast2" {
+resource "google_compute_subnet" "default_asia_northeast1" {
   name          = "default"
+  ip_cidr_range = "10.146.0.0/20"
+  region        = "asia-northeast1"
   network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+resource "google_compute_subnet" "default_us_east5" {
+  name          = "default"
+  ip_cidr_range = "10.178.0.0/20"
+  region        = "us-east5"
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+resource "google_compute_subnet" "default_northamerica_northeast2" {
+  name          = "default"
+  ip_cidr_range = "10.180.0.0/20"
+  region        = "northamerica-northeast2"
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+resource "google_compute_subnet" "default_asia_southeast2" {
+  name          = "default"
+  ip_cidr_range = "10.182.0.0/20"
   region        = "asia-southeast2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_asia_southeast1" {
+resource "google_compute_subnet" "default_asia_east2" {
   name          = "default"
+  ip_cidr_range = "10.184.0.0/20"
+  region        = "asia-east2"
   network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+resource "google_compute_subnet" "default_asia_southeast1" {
+  name          = "default"
+  ip_cidr_range = "10.158.0.0/20"
   region        = "asia-southeast1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_asia_south1" {
+resource "google_compute_subnet" "default_asia_south1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.162.0.0/20"
   region        = "asia-south1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_west3" {
+resource "google_compute_subnet" "default_europe_west3" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.144.0.0/20"
   region        = "europe-west3"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_australia_southeast1" {
+resource "google_compute_subnet" "default_australia_southeast1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.136.0.0/20"
   region        = "australia-southeast1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_us_east4" {
+resource "google_compute_subnet" "default_us_east4" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.144.0.0/20"
   region        = "us-east4"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_north1" {
+resource "google_compute_subnet" "default_europe_north1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.164.0.0/20"
   region        = "europe-north1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_southwest1" {
+resource "google_compute_subnet" "default_europe_southwest1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.186.0.0/20"
   region        = "europe-southwest1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_west1" {
+resource "google_compute_subnet" "default_europe_west1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.138.0.0/20"
   region        = "europe-west1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_me_west1" {
+resource "google_compute_subnet" "default_us_west3" {
   name          = "default"
+  ip_cidr_range = "10.168.0.0/20"
+  region        = "us-west3"
   network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+resource "google_compute_subnet" "default_northamerica_south1" {
+  name          = "default"
+  ip_cidr_range = "10.172.0.0/20"
+  region        = "northamerica-south1"
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+resource "google_compute_subnet" "default_us_central1" {
+  name          = "default"
+  ip_cidr_range = "10.142.0.0/20"
+  region        = "us-central1"
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+resource "google_compute_subnet" "default_europe_west6" {
+  name          = "default"
+  ip_cidr_range = "10.140.0.0/20"
+  region        = "europe-west6"
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+resource "google_compute_subnet" "default_me_west1" {
+  name          = "default"
+  ip_cidr_range = "10.188.0.0/20"
   region        = "me-west1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_europe_central2" {
+resource "google_compute_subnet" "default_europe_central2" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.190.0.0/20"
   region        = "europe-central2"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  network       = "default"
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_compute_subnetwork" "default_southamerica_east1" {
+resource "google_compute_subnet" "default_southamerica_east1" {
   name          = "default"
-  network       = "default"
+  ip_cidr_range = "10.146.0.0/20"
   region        = "southamerica-east1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
-    aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
-  }
-}
-
-resource "google_compute_subnetwork" "default_africa_south1" {
-  name          = "default"
   network       = "default"
-  region        = "africa-south1"
-  ip_cidr_range = "10.128.0.0/20"
-  private_ip_google_access = true
-  log_config {
+  project = "aviato-game-fight-rvxirf"
+    log_config {
     aggregation_interval = "INTERVAL_5_SEC"
-    flow_sampling = 0.5
-    metadata = "INCLUDE_ALL_METADATA"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
-resource "google_service_account" "unused_service_accounts_1" {
-  account_id   = "aviato-game-fight-rvxirf@appspot"
-  disabled     = true
-}
-
-resource "google_service_account" "unused_service_accounts_2" {
-  account_id   = "firebase-adminsdk-d21rv@aviato-game-fight-rvxirf"
-  disabled     = true
-}
-
-resource "google_project_iam_binding" "twitch_login_iam" {
+resource "google_compute_subnet" "default_africa_south1" {
+  name          = "default"
+  ip_cidr_range = "10.156.0.0/20"
+  region        = "africa-south1"
+  network       = "default"
   project = "aviato-game-fight-rvxirf"
-  role = "roles/viewer"
-  members = [
-    "serviceAccount:twitch-login@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
-  ]
+    log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
 }
 
-resource "google_project_iam_binding" "default_compute_iam" {
+resource "google_project_service" "cloudasset" {
   project = "aviato-game-fight-rvxirf"
-  role = "roles/viewer"
-  members = [
-    "serviceAccount:30647320905-compute@developer.gserviceaccount.com",
-  ]
-}
-
-resource "google_logging_project_sink" "all_logs_sink" {
-  name = "all-logs-sink"
-  destination = "google_storage_bucket.all_logs_bucket.name"
-  filter = "NOT logName:cloudaudit.googleapis.com/activity OR NOT logName:securitycenter.googleapis.com/sources/1234567890123/findings"
-}
-
-resource "google_storage_bucket" "all_logs_bucket" {
-  name                        = "all-logs-bucket-aviato-game-fight-rvxirf"
-  location                    = "US"
-  uniform_bucket_level_access = true
+  service = "cloudasset.googleapis.com"
+  disable_on_destroy = false
 }
