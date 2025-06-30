@@ -1,72 +1,11 @@
 variable "project_id" {
   type        = string
-  description = "The ID of the project in which to provision resources."
+  description = "The ID of the project to configure."
   default     = "aviato-game-fight-rvxirf"
 }
 
-variable "region" {
+variable "bigquery_dataset_id" {
   type        = string
-  description = "The region in which to provision resources."
-  default     = "us-central1"
-}
-
-variable "default_vpc_regions" {
-  type = list(string)
-  default = [
-    "asia-east2",
-    "asia-southeast2",
-    "us-east5",
-    "europe-west8",
-    "europe-west3",
-    "europe-west9",
-    "me-central1",
-    "asia-south2",
-    "asia-northeast3",
-    "australia-southeast1",
-    "asia-south1",
-    "northamerica-south1",
-    "me-west1",
-    "asia-northeast2",
-    "europe-west2",
-    "asia-northeast1",
-    "me-central2",
-    "northamerica-northeast1",
-    "southamerica-west1",
-    "europe-west6",
-    "australia-southeast2",
-    "europe-west12",
-    "us-south1",
-    "europe-central2",
-    "europe-west4",
-    "europe-west10",
-    "asia-southeast1",
-    "asia-east1",
-    "us-west1",
-    "europe-west1",
-    "northamerica-northeast1",
-    "europe-north2",
-    "africa-south1",
-    "europe-north1",
-    "southamerica-east1",
-    "us-west4",
-    "us-west3",
-    "us-east4",
-    "us-central1",
-    "us-west2",
-    "europe-southwest1",
-    "us-east1"
-  ]
-  description = "List of regions with default subnets"
-}
-
-variable "default_allow_ssh_source_range" {
-  type        = list(string)
-  description = "The allowed source range for SSH traffic."
-  default     = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
-}
-
-variable "default_allow_rdp_source_range" {
-  type        = list(string)
-  description = "The allowed source range for RDP traffic."
-  default     = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+  description = "The ID of the BigQuery dataset to use for logging."
+  default     = "gcp_logging_dataset"
 }
