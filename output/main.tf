@@ -2,14 +2,13 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 5.0"
+      version = "5.24.0"
     }
   }
 }
 
 provider "google" {
   project = var.project_id
-  region  = "us-central1"
 }
 
 resource "google_project_metadata" "project_metadata" {
@@ -20,121 +19,169 @@ resource "google_project_metadata" "project_metadata" {
   }
 }
 
-resource "google_project_service" "artifactregistry" {
-  project = var.project_id
-  service = "artifactregistry.googleapis.com"
+resource "google_project_service" "artifact_analysis" {
+  project            = var.project_id
+  service            = "containeranalysis.googleapis.com"
   disable_on_destroy = false
-}
-
-resource "google_project_service" "containeranalysis" {
-  project = var.project_id
-  service = "containeranalysis.googleapis.com"
-  disable_on_destroy = false
-  depends_on = [google_project_service.artifactregistry]
 }
 
 resource "google_project_service" "cloudasset" {
-  project = var.project_id
-  service = "cloudasset.googleapis.com"
+  project            = var.project_id
+  service            = "cloudasset.googleapis.com"
   disable_on_destroy = false
 }
 
-resource "google_compute_network" "default" {
-  name                    = "default"
-  project                 = var.project_id
-  delete_default_routes = true
-}
-
-resource "google_compute_network" "vpc_network" {
-  name                    = "vpc-network"
-  project                 = var.project_id
-  auto_create_subnetworks = "false"
-}
-
-resource "google_compute_firewall" "allow_ssh" {
-  name    = "allow-ssh-from-defined-range"
-  network = google_compute_network.vpc_network.name
+resource "google_compute_firewall" "default_allow_ssh" {
+  name    = "default-allow-ssh"
   project = var.project_id
+  network = "default"
 
   allow {
     protocol = "tcp"
     ports    = ["22"]
   }
 
-  source_ranges = var.default_ssh_source_range
+  source_ranges = var.default_ssh_source_ranges
 }
 
-resource "google_compute_firewall" "allow_rdp" {
-  name    = "allow-rdp-from-defined-range"
-  network = google_compute_network.vpc_network.name
+resource "google_compute_firewall" "default_allow_rdp" {
+  name    = "default-allow-rdp"
   project = var.project_id
+  network = "default"
 
   allow {
     protocol = "tcp"
     ports    = ["3389"]
   }
 
-  source_ranges = var.default_rdp_source_range
+  source_ranges = var.default_rdp_source_ranges
 }
 
-resource "google_compute_subnetwork" "default_subnet" {
-  for_each = toset(var.regions_with_default_subnet)
+resource "google_storage_bucket" "default" {
+  for_each = toset(var.gcs_buckets_uniform_access)
 
-  name          = "default"
-  ip_cidr_range = "10.10.10.0/24"
-  network       = google_compute_network.vpc_network.name
-  region        = each.value
-  project = var.project_id
-  enable_flow_logs = true
-}
-
-resource "google_storage_bucket" "gcs_logging_bucket" {
-  name          = var.gcs_logging_bucket
+  name          = each.value
   project       = var.project_id
   location      = "US"
-  force_destroy = true
+  force_destroy = false
+
   uniform_bucket_level_access = true
 }
 
-resource "google_logging_project_sink" "gcp_logging_sink" {
-  name        = "all-logs-to-gcs"
+resource "google_compute_subnet" "default" {
+  for_each = toset(var.all_regions)
+
+  name                     = "default"
+  project                  = var.project_id
+  region                   = each.value
+  network                  = "default"
+  ip_cidr_range            = "10.128.0.0/20" #Default value, change as necessary
+  private_ip_google_access = true
+  enable_flow_logs         = true
+}
+
+resource "google_logging_metric" "audit_configuration_changes" {
+  name        = "audit-configuration-changes"
   project     = var.project_id
-  destination = "storage.googleapis.com/${google_storage_bucket.gcs_logging_bucket.name}"
-  filter      = "NOT logName:\"projects/${var.project_id}/logs/cloudaudit.googleapis.com%2Fdata_access\""
-}
-
-resource "google_storage_bucket" "gcs_buckets" {
-  for_each = toset(var.gcs_buckets_uniform_acl)
-
-  name          = each.key
-  project       = var.project_id
-  location      = "AUSTRALIA-SOUTHEAST1"
-  force_destroy = true
-  uniform_bucket_level_access = true
-}
-
-resource "google_iam_policy" "compute_default_service_account_policy" {
-  name = "computeDefaultSAPolicy"
-  policy_data = data.google_iam_policy.compute_default_service_account_iam_policy.policy_data
-}
-
-data "google_iam_policy" "compute_default_service_account_iam_policy" {
-  binding {
-    role = "roles/viewer"
-    members = [
-      "serviceAccount:${var.project_id}@appspot.gserviceaccount.com",
-      "serviceAccount:firebase-adminsdk-d21rv@${var.project_id}.iam.gserviceaccount.com",
-      "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
-    ]
+  description = "This metric counts the number of audit configuration changes."
+  filter      = "resource.type=audited_resource AND severity>=ERROR AND (protoPayload.methodName:SetIamPolicy OR protoPayload.methodName:InsertRole OR protoPayload.methodName:DeleteRole)"
+  metric_descriptor {
+    metric_kind = "COUNTER"
+    value_type  = "INT64"
+    unit        = "1"
   }
 }
 
-data "google_project" "project" {
-  project_id = var.project_id
+resource "google_logging_metric" "bucket_permission_changes" {
+  name        = "bucket-permission-changes"
+  project     = var.project_id
+  description = "This metric counts the number of bucket permission changes."
+  filter      = "resource.type=gcs_bucket AND severity>=ERROR AND protoPayload.methodName:storage.setIamPermissions"
+  metric_descriptor {
+    metric_kind = "COUNTER"
+    value_type  = "INT64"
+    unit        = "1"
+  }
 }
 
-resource "google_project_iam_member" "no_admin_twitch_login" {
+resource "google_logging_metric" "custom_role_changes" {
+  name        = "custom-role-changes"
+  project     = var.project_id
+  description = "This metric counts the number of custom role changes."
+  filter      = "resource.type=iam_role AND severity>=ERROR AND (protoPayload.methodName:CreateRole OR protoPayload.methodName:DeleteRole OR protoPayload.methodName:UpdateRole)"
+  metric_descriptor {
+    metric_kind = "COUNTER"
+    value_type  = "INT64"
+    unit        = "1"
+  }
+}
+
+resource "google_logging_metric" "project_ownership_changes" {
+  name        = "project-ownership-changes"
+  project     = var.project_id
+  description = "This metric counts the number of project ownership changes."
+  filter      = "resource.type=project AND severity>=ERROR AND protoPayload.methodName:SetIamPolicy AND protoPayload.request.policy.bindings.role:roles/owner"
+  metric_descriptor {
+    metric_kind = "COUNTER"
+    value_type  = "INT64"
+    unit        = "1"
+  }
+}
+
+resource "google_logging_metric" "sql_instance_configuration_changes" {
+  name        = "sql-instance-configuration-changes"
+  project     = var.project_id
+  description = "This metric counts the number of SQL instance configuration changes."
+  filter      = "resource.type=cloudsql_instance AND severity>=ERROR AND protoPayload.methodName:cloudsql.instances.update"
+  metric_descriptor {
+    metric_kind = "COUNTER"
+    value_type  = "INT64"
+    unit        = "1"
+  }
+}
+
+resource "google_logging_metric" "vpc_firewall_rule_changes" {
+  name        = "vpc-firewall-rule-changes"
+  project     = var.project_id
+  description = "This metric counts the number of VPC firewall rule changes."
+  filter      = "resource.type=gce_firewall_rule AND severity>=ERROR AND (protoPayload.methodName:compute.firewalls.insert OR protoPayload.methodName:compute.firewalls.patch)"
+  metric_descriptor {
+    metric_kind = "COUNTER"
+    value_type  = "INT64"
+    unit        = "1"
+  }
+}
+
+resource "google_logging_metric" "vpc_network_changes" {
+  name        = "vpc-network-changes"
+  project     = var.project_id
+  description = "This metric counts the number of VPC network changes."
+  filter      = "resource.type=gce_network AND severity>=ERROR AND (protoPayload.methodName:compute.networks.insert OR protoPayload.methodName:compute.networks.patch)"
+  metric_descriptor {
+    metric_kind = "COUNTER"
+    value_type  = "INT64"
+    unit        = "1"
+  }
+}
+
+resource "google_logging_metric" "vpc_network_route_changes" {
+  name        = "vpc-network-route-changes"
+  project     = var.project_id
+  description = "This metric counts the number of VPC network route changes."
+  filter      = "resource.type=gce_route AND severity>=ERROR AND (protoPayload.methodName:compute.routes.insert OR protoPayload.methodName:compute.routes.delete)"
+  metric_descriptor {
+    metric_kind = "COUNTER"
+    value_type  = "INT64"
+    unit        = "1"
+  }
+}
+
+resource "google_logging_project_sink" "default_sink" {
+  name   = "default-sink"
   project = var.project_id
-  role    = "roles/viewer"
-  member  = "serviceAccount:twitch-login@${var.project_id}.iam.gserviceaccount.com"
+  description = "Sink to export all logs to a GCS bucket"
+  destination = "storage.googleapis.com/${var.project_id}-logs" 
+  filter = "NOT logName:projects/${var.project_id}/logs/cloudaudit.googleapis.com%2Factivity" # Exclude audit logs to avoid double billing
+
+  unique_writer_identity = true
 }
