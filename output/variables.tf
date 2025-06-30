@@ -4,37 +4,35 @@ variable "project_id" {
   default     = "aviato-game-fight-rvxirf"
 }
 
-variable "location" {
+variable "gcp_region" {
   type        = string
-  description = "Location for resources"
-  default     = "US"
+  description = "The GCP region to deploy resources to."
+  default     = "us-central1"
 }
 
-variable "default_ssh_source_range" {
-  type        = list(string)
-  description = "Source ranges for default ssh firewall rule"
-  default     = ["10.0.0.0/8"]
+variable "allowed_ssh_cidrs" {
+  type = list(string)
+  description = "List of CIDR blocks allowed for SSH access"
+  default = ["10.0.0.0/8"]
 }
 
-variable "default_rdp_source_range" {
-  type        = list(string)
-  description = "Source ranges for default rdp firewall rule"
-  default     = ["10.0.0.0/8"]
+variable "allowed_rdp_cidrs" {
+  type = list(string)
+  description = "List of CIDR blocks allowed for RDP access"
+  default = ["10.0.0.0/8"]
 }
 
-variable "log_sink_destination" {
-  type = string
-  description = "The destination for the log sink"
-  default = "YOUR_LOG_SINK_BUCKET_NAME"
+variable "bucket_names" {
+  type = list(string)
+  description = "List of bucket names to apply uniform bucket level access."
+  default = [
+    "aviato-game-fight-rvxirf.appspot.com",
+    "aviato-game-fight-rvxirf_bucket",
+    "staging.aviato-game-fight-rvxirf.appspot.com"
+  ]
 }
 
-variable "log_sink_filter" {
-  type = string
-  description = "The filter for the log sink"
-  default = ""
-}
-
-variable "default_regions" {
+variable "default_subnet_regions" {
   type = list(string)
   description = "List of regions where default subnets exist"
   default = [
@@ -54,14 +52,13 @@ variable "default_regions" {
     "europe-north2",
     "europe-southwest1",
     "europe-west1",
-    "europe-west10",
-    "europe-west12",
     "europe-west2",
     "europe-west3",
     "europe-west4",
     "europe-west6",
     "europe-west8",
     "europe-west9",
+    "europe-west10",
     "me-central1",
     "me-central2",
     "me-west1",
