@@ -45,9 +45,18 @@ variable "regions" {
     "europe-west12",
     "europe-west8",
     "me-central1",
-    "europe-west3"
+    "europe-west3",
+    "us-east1",
+    "europe-central2",
+    "me-west1"
   ]
   description = "List of regions to enable VPC flow logs"
+}
+
+variable "default_network_name" {
+  type    = string
+  default = "default"
+  description = "Name of the default network"
 }
 
 variable "bucket_names" {
@@ -57,22 +66,5 @@ variable "bucket_names" {
     "aviato-game-fight-rvxirf_bucket",
     "staging.aviato-game-fight-rvxirf.appspot.com"
   ]
-  description = "List of cloud storage bucket names"
-}
-
-variable "default_network_name" {
-  type        = string
-  default     = "default"
-  description = "The name of the default network"
-}
-
-variable "service_account_emails" {
-  type = list(string)
-  default = [
-    "twitch-login@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
-    "aviato-game-fight-rvxirf@appspot.gserviceaccount.com",
-    "30647320905-compute@developer.gserviceaccount.com",
-    "firebase-adminsdk-d21rv@aviato-game-fight-rvxirf.iam.gserviceaccount.com"
-  ]
-  description = "List of service account emails"
+  description = "List of cloud storage buckets"
 }
