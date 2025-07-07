@@ -1,6 +1,6 @@
 variable "project_id" {
   type        = string
-  description = "The ID of the project in which to provision resources."
+  description = "The ID of the project"
   default     = "aviato-game-fight-rvxirf"
 }
 
@@ -48,13 +48,13 @@ variable "regions" {
     "europe-west3",
     "us-east1",
     "europe-central2",
-    "me-west1",
+    "me-west1"
   ]
-  description = "List of regions to enable VPC flow logs"
+  description = "List of regions"
 }
 
-variable "default_network_deletion" {
-  type        = bool
-  default     = true
-  description = "Set to true to delete the default network"
+variable "api_key_rotation_period" {
+  type        = number
+  description = "The number of days after which API keys should be rotated"
+  default     = 90
 }
