@@ -1,6 +1,6 @@
 variable "project_id" {
   type        = string
-  description = "The ID of the project in which to provision resources."
+  description = "The ID of the project"
   default     = "aviato-game-fight-rvxirf"
 }
 
@@ -50,23 +50,38 @@ variable "regions" {
     "europe-central2",
     "me-west1"
   ]
+  description = "List of regions to enable VPC flow logs"
 }
 
-variable "default_network_name" {
-  type    = string
-  default = "default"
+variable "default_network_deletion" {
+  type        = bool
+  description = "Enable deletion of default network"
+  default     = true
 }
 
-variable "bucket_names" {
+variable "api_key_rotation_period" {
+  type        = number
+  description = "The number of days after which API keys should be rotated"
+  default     = 90
+}
+
+variable "uniform_bucket_level_access_buckets" {
   type = list(string)
   default = [
     "aviato-game-fight-rvxirf.appspot.com",
     "aviato-game-fight-rvxirf_bucket",
     "staging.aviato-game-fight-rvxirf.appspot.com"
   ]
+  description = "List of cloud storage buckets to enable uniform bucket level access"
 }
 
-variable "api_key_rotation_days" {
-  type    = number
-  default = 90
+variable "service_accounts_to_remove_admin_privileges" {
+  type = list(string)
+  default = [
+    "twitch-login@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
+    "aviato-game-fight-rvxirf@appspot.gserviceaccount.com",
+    "30647320905-compute@developer.gserviceaccount.com",
+    "firebase-adminsdk-d21rv@aviato-game-fight-rvxirf.iam.gserviceaccount.com"
+  ]
+  description = "List of service accounts from which to remove admin privileges"
 }
