@@ -1,6 +1,6 @@
 variable "project_id" {
   type        = string
-  description = "The GCP project ID."
+  description = "The ID of the project"
   default     = "aviato-game-fight-rvxirf"
 }
 
@@ -45,43 +45,22 @@ variable "regions" {
     "europe-west12",
     "europe-west8",
     "me-central1",
-    "europe-west3",
-    "us-east1",
-    "europe-central2",
-    "me-west1"
+    "europe-west3"
   ]
-  description = "List of regions where subnets exist."
 }
 
-variable "api_key_rotation_days" {
-  type        = number
-  default     = 90
-  description = "Number of days after which API keys should be rotated."
-}
-
-variable "default_network_name" {
-  type        = string
-  default     = "default"
-  description = "The name of the default network to be deleted."
-}
-
-variable "uniform_bucket_level_access_buckets" {
+variable "bucket_names" {
   type = list(string)
   default = [
     "aviato-game-fight-rvxirf.appspot.com",
     "aviato-game-fight-rvxirf_bucket",
     "staging.aviato-game-fight-rvxirf.appspot.com"
   ]
-  description = "List of cloud storage buckets for which uniform bucket-level access should be enabled."
 }
 
-variable "service_accounts_no_admin" {
+variable "api_keys" {
   type = list(string)
   default = [
-    "twitch-login@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
-    "aviato-game-fight-rvxirf@appspot.gserviceaccount.com",
-    "30647320905-compute@developer.gserviceaccount.com",
-    "firebase-adminsdk-d21rv@aviato-game-fight-rvxirf.iam.gserviceaccount.com"
+    "Browser key (auto created by Firebase)"
   ]
-  description = "List of service accounts that should not have admin privileges."
 }
