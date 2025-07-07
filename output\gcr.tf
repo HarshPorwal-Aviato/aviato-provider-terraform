@@ -1,5 +1,4 @@
-resource "google_container_registry" "default" {
-  provider = google.gcp
+resource "google_project_service_identity" "container_scanning" {
   project = var.project_id
-  location = "US"
+  service = "containeranalysis.googleapis.com"
 }
