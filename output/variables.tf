@@ -1,9 +1,16 @@
 variable "project_id" {
-  type = string
-  default = "aviato-game-fight-rvxirf"
+  type        = string
+  description = "The ID of the project"
+  default     = "aviato-game-fight-rvxirf"
 }
 
-variable "regions" {
+variable "region" {
+  type        = string
+  description = "The region to deploy resources to"
+  default     = "us-central1"
+}
+
+variable "default_subnets" {
   type = list(string)
   default = [
     "africa-south1",
@@ -47,23 +54,9 @@ variable "regions" {
     "europe-west3",
     "us-east1",
     "europe-central2",
-    "me-west1"
+    "me-west1",
   ]
-}
-
-variable "default_network_name" {
-  type    = string
-  default = "default"
-}
-
-variable "default_allow_ssh_firewall_name" {
-  type = string
-  default = "default-allow-ssh"
-}
-
-variable "default_allow_rdp_firewall_name" {
-  type = string
-  default = "default-allow-rdp"
+  description = "List of default subnets to configure flow logs"
 }
 
 variable "bucket_names" {
@@ -71,7 +64,7 @@ variable "bucket_names" {
   default = [
     "aviato-game-fight-rvxirf.appspot.com",
     "aviato-game-fight-rvxirf_bucket",
-    "staging.aviato-game-fight-rvxirf.appspot.com"
+    "staging.aviato-game-fight-rvxirf.appspot.com",
   ]
+  description = "List of bucket names to configure uniform bucket level access"
 }
-
