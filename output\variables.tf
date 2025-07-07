@@ -1,6 +1,6 @@
 variable "project_id" {
   type        = string
-  description = "The GCP project ID"
+  description = "The ID of the project in which to configure resources."
   default     = "aviato-game-fight-rvxirf"
 }
 
@@ -50,33 +50,17 @@ variable "regions" {
     "europe-central2",
     "me-west1"
   ]
+  description = "List of regions for subnet flow logs."
 }
 
-variable "default_networks" {
-  type = list(string)
-  default = ["default"]
+variable "api_key_rotation_days" {
+  type        = number
+  default     = 90
+  description = "The number of days after which API keys should be rotated."
 }
 
-variable "default_firewall_rules" {
-  type = list(string)
-  default = ["default-allow-rdp", "default-allow-ssh"]
-}
-
-variable "buckets" {
-  type = list(string)
-  default = [
-    "aviato-game-fight-rvxirf.appspot.com",
-    "aviato-game-fight-rvxirf_bucket",
-    "staging.aviato-game-fight-rvxirf.appspot.com"
-  ]
-}
-
-variable "service_accounts" {
-  type = list(string)
-  default = [
-    "twitch-login@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
-    "aviato-game-fight-rvxirf@appspot.gserviceaccount.com",
-    "30647320905-compute@developer.gserviceaccount.com",
-    "firebase-adminsdk-d21rv@aviato-game-fight-rvxirf.iam.gserviceaccount.com"
-  ]
+variable "default_network_deletion" {
+  type = bool
+  default = true
+  description = "Set to true to delete the default network."
 }
