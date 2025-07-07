@@ -1,8 +1,12 @@
-resource "google_storage_bucket" "buckets" {
-  for_each = toset(var.bucket_names)
-  name          = each.key
+resource "google_storage_bucket" "default_buckets" {
+  for_each = toset([
+    "aviato-game-fight-rvxirf.appspot.com",
+    "aviato-game-fight-rvxirf_bucket",
+    "staging.aviato-game-fight-rvxirf.appspot.com"
+  ])
+  name          = each.value
   project       = var.project_id
-  location      = "AUSTRALIA-SOUTHEAST1"
+  location      = "US"
   force_destroy = false
   uniform_bucket_level_access = true
 }
