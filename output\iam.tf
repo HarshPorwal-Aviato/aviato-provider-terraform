@@ -1,22 +1,30 @@
-resource "google_project_iam_member" "service_account_token_creator" {
+resource "google_project_service_identity" "cloudasset" {
   project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "group:admins@example.com"
+  service = "cloudasset.googleapis.com"
 }
 
-resource "google_project_iam_member" "service_account_user" {
+resource "google_project_iam_binding" "no_service_account_user" {
   project = var.project_id
   role    = "roles/iam.serviceAccountUser"
-  member  = "group:admins@example.com"
+  members = []
 }
 
-resource "google_project_iam_binding" "no_admin_privileges" {
+resource "google_project_iam_binding" "no_service_account_token_creator" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  members = []
+}
+
+resource "google_project_iam_binding" "enforce_separation_of_duties" {
+  project = var.project_id
+  role    = "roles/editor"
+  members = []
+}
+
+resource "google_project_iam_binding" "service_account_no_admin" {
+  for_each = toset(var.service_accounts_no_admin)
   project = var.project_id
   role    = "roles/viewer"
-  members = [
-    "serviceAccount:twitch-login@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
-    "serviceAccount:aviato-game-fight-rvxirf@appspot.gserviceaccount.com",
-    "serviceAccount:30647320905-compute@developer.gserviceaccount.com",
-    "serviceAccount:firebase-adminsdk-d21rv@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
-  ]
+  members = ["serviceAccount:${each.value}"]
 }
+
