@@ -1,38 +1,22 @@
-resource "google_project_iam_member" "cloud_asset_inventory" {
-  provider = google.gcp
-  project = var.project_id
-  role   = "roles/cloudasset.owner"
-  member = "user:admin@example.com"
-}
-
-resource "google_project_iam_binding" "no_service_account_user" {
-  provider = google.gcp
-  project = var.project_id
-  role    = "roles/iam.serviceAccountUser"
-
-  members = []
-}
-
-resource "google_project_iam_binding" "no_service_account_token_creator" {
-  provider = google.gcp
+resource "google_project_iam_member" "service_account_token_creator" {
   project = var.project_id
   role    = "roles/iam.serviceAccountTokenCreator"
-
-  members = []
+  member  = "group:admins@example.com"
 }
 
-resource "google_project_iam_binding" "remove_admin_privileges" {
-  provider = google.gcp
-  for_each = toset(var.service_accounts_to_remove_admin_privileges)
+resource "google_project_iam_member" "service_account_user" {
   project = var.project_id
-  role = "roles/owner"
-  members = [
-    "serviceAccount:${each.key}"
-  ]
+  role    = "roles/iam.serviceAccountUser"
+  member  = "group:admins@example.com"
+}
 
-  lifecycle {
-    ignore_changes = [
-      members,
-    ]
-  }
+resource "google_project_iam_binding" "no_admin_privileges" {
+  project = var.project_id
+  role    = "roles/viewer"
+  members = [
+    "serviceAccount:twitch-login@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
+    "serviceAccount:aviato-game-fight-rvxirf@appspot.gserviceaccount.com",
+    "serviceAccount:30647320905-compute@developer.gserviceaccount.com",
+    "serviceAccount:firebase-adminsdk-d21rv@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
+  ]
 }
