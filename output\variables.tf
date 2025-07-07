@@ -1,17 +1,11 @@
 variable "project_id" {
   type        = string
-  description = "The ID of the project"
+  description = "The ID of the project in which to provision resources."
   default     = "aviato-game-fight-rvxirf"
 }
 
-variable "region" {
-  type        = string
-  description = "The region to deploy resources"
-  default     = "us-central1"
-}
-
-variable "default_subnets" {
-  type = list(string)
+variable "regions" {
+  type    = list(string)
   default = [
     "africa-south1",
     "southamerica-west1",
@@ -56,30 +50,11 @@ variable "default_subnets" {
     "europe-central2",
     "me-west1",
   ]
+  description = "List of regions to enable VPC flow logs"
 }
 
-variable "api_keys" {
-  type = list(string)
-  default = [
-    "Browser key (auto created by Firebase)"
-  ]
-}
-
-variable "bucket_names" {
-  type = list(string)
-  default = [
-    "aviato-game-fight-rvxirf.appspot.com",
-    "aviato-game-fight-rvxirf_bucket",
-    "staging.aviato-game-fight-rvxirf.appspot.com",
-  ]
-}
-
-variable "service_accounts" {
-  type = list(string)
-  default = [
-    "twitch-login@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
-    "aviato-game-fight-rvxirf@appspot.gserviceaccount.com",
-    "30647320905-compute@developer.gserviceaccount.com",
-    "firebase-adminsdk-d21rv@aviato-game-fight-rvxirf.iam.gserviceaccount.com"
-  ]
+variable "default_network_deletion" {
+  type        = bool
+  default     = true
+  description = "Set to true to delete the default network"
 }
