@@ -1,6 +1,6 @@
 variable "project_id" {
   type        = string
-  description = "The ID of the project"
+  description = "The GCP project ID"
   default     = "aviato-game-fight-rvxirf"
 }
 
@@ -45,11 +45,24 @@ variable "regions" {
     "europe-west12",
     "europe-west8",
     "me-central1",
-    "europe-west3"
+    "europe-west3",
+    "us-east1",
+    "europe-central2",
+    "me-west1"
   ]
 }
 
-variable "bucket_names" {
+variable "default_networks" {
+  type = list(string)
+  default = ["default"]
+}
+
+variable "default_firewall_rules" {
+  type = list(string)
+  default = ["default-allow-rdp", "default-allow-ssh"]
+}
+
+variable "buckets" {
   type = list(string)
   default = [
     "aviato-game-fight-rvxirf.appspot.com",
@@ -58,9 +71,12 @@ variable "bucket_names" {
   ]
 }
 
-variable "api_keys" {
+variable "service_accounts" {
   type = list(string)
   default = [
-    "Browser key (auto created by Firebase)"
+    "twitch-login@aviato-game-fight-rvxirf.iam.gserviceaccount.com",
+    "aviato-game-fight-rvxirf@appspot.gserviceaccount.com",
+    "30647320905-compute@developer.gserviceaccount.com",
+    "firebase-adminsdk-d21rv@aviato-game-fight-rvxirf.iam.gserviceaccount.com"
   ]
 }
