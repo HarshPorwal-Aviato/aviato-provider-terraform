@@ -49,14 +49,14 @@ variable "regions" {
   ]
 }
 
-variable "default_allow_ssh_source_ranges" {
+variable "allowed_ssh_source_ranges" {
   type    = list(string)
-  default = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+  default = ["0.0.0.0/0"]
   description = "The allowed address ranges for SSH access."
 }
 
-variable "default_allow_rdp_source_ranges" {
+variable "allowed_rdp_source_ranges" {
   type = list(string)
-  default = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+  default = ["0.0.0.0/0"]
   description = "The allowed address ranges for RDP access."
 }
