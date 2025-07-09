@@ -38,6 +38,12 @@ resource "google_compute_network" "default" {
   name                    = "default"
   project                 = var.project_id
   delete_default_routes = true
+
+  depends_on = [
+    google_compute_firewall.allow_ssh,
+    google_compute_firewall.allow_rdp,
+    google_compute_subnetwork.default_subnet
+  ]
 }
 
 resource "google_compute_firewall" "allow_ssh" {
@@ -50,7 +56,7 @@ resource "google_compute_firewall" "allow_ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+  source_ranges = var.allowed_ssh_source_ranges
   target_tags   = []
 }
 
@@ -64,7 +70,7 @@ resource "google_compute_firewall" "allow_rdp" {
     ports    = ["3389"]
   }
 
-  source_ranges = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+  source_ranges = var.allowed_rdp_source_ranges
   target_tags   = []
 }
 
@@ -82,7 +88,6 @@ resource "google_compute_subnetwork" "default_subnet" {
     flow_sampling        = 0.5
     metadata             = "INCLUDE_ALL_METADATA"
   }
-
   enable_flow_logs = true
 }
 
@@ -122,19 +127,27 @@ resource "google_storage_bucket" "bucket_uniform_level_access3" {
   uniform_bucket_level_access = true
 }
 
+resource "google_project_service" "artifactregistry" {
+  project = var.project_id
+  service = "artifactregistry.googleapis.com"
+}
+
 resource "google_project_iam_audit_config" "audit_config" {
   project = var.project_id
   service = "allServices"
 
   audit_log_config {
     log_type = "ADMIN_READ"
+    exempted_members = []
   }
 
-  audit_log_config {
+   audit_log_config {
     log_type = "DATA_READ"
+    exempted_members = []
   }
 
-  audit_log_config {
+   audit_log_config {
     log_type = "DATA_WRITE"
+    exempted_members = []
   }
 }
