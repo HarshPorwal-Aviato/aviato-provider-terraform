@@ -1,6 +1,7 @@
 variable "project_id" {
   type        = string
   description = "The ID of the project in which to provision resources."
+  default     = "aviato-game-fight-rvxirf"
 }
 
 variable "regions" {
@@ -44,20 +45,17 @@ variable "regions" {
     "us-west2",
     "us-east4",
     "europe-north1",
-    "us-east1",
-    "africa-south1",
-    "me-central1",
-    "europe-west4"
+    "us-east1"
   ]
 }
 
-variable "restricted_ssh_source_ranges" {
+variable "default_allow_ssh_source_ranges" {
   type    = list(string)
   default = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
   description = "The allowed address ranges for SSH access."
 }
 
-variable "restricted_rdp_source_ranges" {
+variable "default_allow_rdp_source_ranges" {
   type = list(string)
   default = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
   description = "The allowed address ranges for RDP access."
