@@ -4,18 +4,10 @@ terraform {
       source  = "hashicorp/google"
       version = ">= 4.0"
     }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 4.0"
-    }
   }
 }
 
 provider "google" {
-  project = var.project_id
-}
-
-provider "google-beta" {
   project = var.project_id
 }
 
@@ -46,12 +38,6 @@ resource "google_compute_network" "default" {
   name                    = "default"
   project                 = var.project_id
   delete_default_routes = true
-
-  lifecycle {
-    ignore_changes = [
-      auto_create_subnetworks,
-    ]
-  }
 }
 
 resource "google_compute_firewall" "allow_ssh" {
@@ -64,14 +50,8 @@ resource "google_compute_firewall" "allow_ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = var.restricted_ssh_source_ranges
+  source_ranges = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
   target_tags   = []
-
-  lifecycle {
-    replace_triggered_by = [
-      google_compute_network.default
-    ]
-  }
 }
 
 resource "google_compute_firewall" "allow_rdp" {
@@ -84,14 +64,8 @@ resource "google_compute_firewall" "allow_rdp" {
     ports    = ["3389"]
   }
 
-  source_ranges = var.restricted_rdp_source_ranges
+  source_ranges = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
   target_tags   = []
-
-    lifecycle {
-    replace_triggered_by = [
-      google_compute_network.default
-    ]
-  }
 }
 
 resource "google_compute_subnetwork" "default_subnet" {
@@ -110,7 +84,6 @@ resource "google_compute_subnetwork" "default_subnet" {
   }
 
   enable_flow_logs = true
-
 }
 
 resource "google_project_metadata" "default" {
@@ -164,10 +137,4 @@ resource "google_project_iam_audit_config" "audit_config" {
   audit_log_config {
     log_type = "DATA_WRITE"
   }
-}
-
-resource "google_project_service" "artifactregistry" {
-  project = var.project_id
-  service = "artifactregistry.googleapis.com"
-  disable_on_destroy = false
 }
