@@ -1,14 +1,11 @@
 variable "project_id" {
-  type    = string
-  default = "aviato-game-fight-rvxirf"
-}
-
-variable "bucket_name" {
-  type = string
-  default = "gcp-logging-bucket-tf"
+  type        = string
+  description = "The ID of the project"
+  default     = "aviato-game-fight-rvxirf"
 }
 
 variable "region" {
-  type = string
-  default = "us-central1"
+  type        = string
+  description = "The region to deploy resources to"
+  default     = "australia-southeast1"
 }
